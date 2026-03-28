@@ -18,7 +18,10 @@ import fs from "fs"
                 resource_type:"auto"
             })
             // file has been uploaded successfull
-            console.log("file is uploaded in cloudinary",response.url);
+            // console.log("file is uploaded in cloudinary",response.url);
+            fs.unlinkSync(localfilepath,{
+                resource_type:"auto"
+            })
             return response;
         }catch(error){
             fs.unlinkSync(localfilepath) // remove the locally saved temproray as the upload operation got failed
