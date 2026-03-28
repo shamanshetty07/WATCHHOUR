@@ -10,7 +10,7 @@ import fs from "fs"
     });
 
 
-    const uploadoncloudinary=async(localfilepath)=>{
+    const uploadOnCloudinary=async(localfilepath)=>{
         try{
             if(!localfilepath) return null
             //upload the file in the cloudinary
@@ -26,4 +26,4 @@ import fs from "fs"
     }
 
 
-    export {uploadoncloudinary}
+    export {uploadOnCloudinary}

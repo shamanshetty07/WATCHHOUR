@@ -1,8 +1,10 @@
-import  mongoose ,{schema} from "mongoose";
+import mongoose from "mongoose";
+
+const { Schema } = mongoose;
 import jwt from "jsonwebtoken";    // jwt is bearer token // mostly used for authorization and etc
 import bcrypt from "bcrypt"           // used to store hashed password in the database
 
-const userSchema=new schema({
+const userSchema=new Schema({
     username:{
         type:String,
         required:true,
@@ -54,7 +56,7 @@ const userSchema=new schema({
 
 userSchema.pre("save", async function(next){
     if(this.isModified("password")) return next();
-    this.password=bcrypt.hash(this.password,10)
+    this.password=await bcrypt.hash(this.password,10)
     next()
 
 })
@@ -89,5 +91,5 @@ userSchema.methods.genrateRefreshToken=function(){
 
 )
 }
-export const user=mongoose.model("User",userSchema)
+export const User=mongoose.model("User",userSchema)
 

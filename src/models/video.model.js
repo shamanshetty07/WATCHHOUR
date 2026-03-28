@@ -1,4 +1,6 @@
-import mongoose,{Schema} from "mongoose";
+import mongoose from "mongoose";
+
+const { Schema } = mongoose;
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2"; // when you usually ask for anything you will evrethingh at once but pagination will aloow you send some chunks at once not all at once like 10 videos in page 1 and 10 more in page 2 
 
 const videoSchema=new Schema({
