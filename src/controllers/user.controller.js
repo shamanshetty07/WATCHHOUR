@@ -7,7 +7,18 @@ import { response } from "express";
 
 import jwt from "jsonwebtoken"
 import mongoose from "mongoose";
-
+const generateAcessAndRefreshTokens=async(userId)=>{
+  try{
+   const user= await User.findById(userId)
+ const acessToken=  user.genrateAccessToken
+ const refereshToken=user.genrateRefreshToken
+ user.refereshToken=refereshToken;
+ await user.save({validateBEforeSave: false})
+ return {acessToken,refereshToken}
+  }catch(error){
+    throw new ApiError(500,"something went while genrating access and refersh token")
+  }
+}
 const registerUser=asyncHandler(async(req,res)=>{
         //get user deatils from frontend
         //validation - not empty
@@ -74,4 +85,58 @@ const registerUser=asyncHandler(async(req,res)=>{
         new ApiResponse(200,createdUser,"User registered suceessfully")
      )
 })
-export {registerUser}
+
+
+const loginuser=asyncHandler(async(req,res)=>{
+  //req body->date
+  //username or email
+  // find the user
+  //password check
+  //acess and referesh token
+  //send cookie(secure)
+
+
+  const{email,username,password}=req.body
+
+
+  if(!username || !email){
+    throw new ApiError(400,"username or email is required")
+  }
+  const user=await User.findOne({
+    $or:[{username},{email}]
+  })
+
+  if(!user){
+    throw new ApiError(404,"user does not exist")
+  }
+
+
+  const isPasswordValid = await user.isPasswordCorrect(password)
+
+if(!isPasswordValid){
+  throw new ApiError(401,"invalid user credentials")
+}
+
+const{ acessToken,refereshToken}=await  generateAcessAndRefreshTokens(user._id);
+
+ const loggedInUser= User.findById(user._id).select("-password -refershToken")
+
+ const options={
+
+  httpOnly:true,
+  secure:true
+ }
+ return res.status(200).cookie("acessToken",acessToken,options).cookie("refreshToken",refereshToken,options)
+ .json(
+  new ApiResponse(
+    200,{
+      user: loggedInUser,acessToken,refereshToken
+    },
+    "User logged in successfully"
+  )
+)
+})
+const logoutUser=asyncHandler(async(req,res)=>{
+
+})
+export {registerUser,loginuser}
