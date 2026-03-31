@@ -10,9 +10,9 @@ import mongoose from "mongoose";
 const generateAcessAndRefreshTokens=async(userId)=>{
   try{
    const user= await User.findById(userId)
- const acessToken=  user.genrateAccessToken
- const refereshToken=user.genrateRefreshToken
- user.refereshToken=refereshToken;
+ const acessToken=  user.genrateAccessToken()
+ const refereshToken=user.genrateRefreshToken()
+ user.refreshToken=refereshToken;
  await user.save({validateBEforeSave: false})
  return {acessToken,refereshToken}
   }catch(error){
@@ -99,7 +99,7 @@ const loginuser=asyncHandler(async(req,res)=>{
   const{email,username,password}=req.body
 
 
-  if(!username || !email){
+  if(!(username || email)){
     throw new ApiError(400,"username or email is required")
   }
   const user=await User.findOne({
@@ -119,7 +119,7 @@ if(!isPasswordValid){
 
 const{ acessToken,refereshToken}=await  generateAcessAndRefreshTokens(user._id);
 
- const loggedInUser= User.findById(user._id).select("-password -refershToken")
+ const loggedInUser= await User.findById(user._id).select("-password -refreshToken")
 
  const options={
 
@@ -137,6 +137,66 @@ const{ acessToken,refereshToken}=await  generateAcessAndRefreshTokens(user._id);
 )
 })
 const logoutUser=asyncHandler(async(req,res)=>{
+     await  User.findByIdAndUpdate(
+        req.user._id,
+        {
+          $set:{
+            refereshToken:undefined
+          }
+        },{
+          new:true
+        }
+      )
+      const options={
+        httpOnly:true,
+        secure:true
 
+      }
+      return res.status(200).clearCookie("acessToken",options)
+      .clearCookie("refereshToken",options)
+      .json(new ApiResponse(200,{},"User logged Out"))
 })
-export {registerUser,loginuser}
+
+
+const refreshAcessToken=asyncHandler(async(req,res)=>{
+  const incomingRefreshToken=req.cookies.refreshToken || req.body.refereshToken
+
+  if(incomingRefreshToken){
+    throw new ApiError(401,"unauthorized request")
+  }
+
+try {
+    const decodedToken=jwt.verify(
+      incomingRefreshToken,
+      process.env.ACCESS_TOKEN_SECRET
+    )
+  
+  
+    const user = await User.findById(decodedToken?._id)
+    if(!user){
+      throw new ApiError(401,"Invalid refresh token")
+    }
+  if(incomingRefreshToken!==user?.refereshToken){
+    throw new ApiError(401,"invalid refresh token")
+  
+  }
+  const options={
+    httpOnly: true,
+    secure: true
+  }
+  
+  const {acessToken,newRefreshToken}=await generateAcessAndRefreshTokens(user._id)
+  
+  return res.status(200).cookie("accessToken",acessToken,options).cookie("refreshToken",newRefreshTokenrefreshToken,options)
+    .json(
+      new ApiResponse(
+        200,
+        {acessToken,refreshToken: newRefreshToken},
+        "Acess token refreshed"
+      )
+    )
+} catch (error) {
+  throw new ApiError(401,error?.message || "invalid refresh token")
+}
+})
+export {registerUser,loginuser,logoutUser,refreshAcessToken}
