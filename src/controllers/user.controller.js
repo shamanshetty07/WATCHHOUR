@@ -249,7 +249,7 @@ const user= await User.findByIdAndUpdate(
   req.user?._id,
   {$set:{
     avatar:avatar.url
-  }},
+  }},                                                           // delete the old image from the cloudinary
   {new:true}
  ).select("-password")
   return res.status(200).json(200,user,"Avatar image updated successfully")
