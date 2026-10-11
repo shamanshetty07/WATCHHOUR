@@ -1,41 +1,50 @@
 import { Router } from "express";
 import {
-  loginuser,
+  loginUser,
   registerUser,
   logoutUser,
-  refreshAcessToken,
+  refreshAccessToken,
   changeCurrentPassword,
   getCurrentUser,
   updateUserAvatar,
   getUserChannelProfile,
-  getWatdhHistory,
-  updateCoverImage,
+  getWatchHistory,
+  updateUserCoverImage,
+  updateAccountDetails,
 } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
+import { handleMulterError } from "../middlewares/multerError.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { optionalVerifyJWT } from "../middlewares/optionalAuth.middleware.js";
 
 const router = Router();
 
 router.route("/register").post(
-  upload.fields([
-    { name: "avatar", maxCount: 1 },
-    { name: "coverImage", maxCount: 1 },
-  ]),
+  (req, res, next) => {
+    upload.fields([
+      { name: "avatar", maxCount: 1 },
+      { name: "coverImage", maxCount: 1 },
+    ])(req, res, (err) => {
+      if (err) return handleMulterError(err, req, res, next);
+      next();
+    });
+  },
   registerUser
 );
-router.route("/login").post(loginuser);
+router.route("/login").post(loginUser);
+router.route("/refresh-token").post(refreshAccessToken);
 
-//secured routes
 router.route("/logout").post(verifyJWT, logoutUser);
-router.route("/refresh_token").post(refreshAcessToken); //if any error shows up first check this
 router.route("/change-password").post(verifyJWT, changeCurrentPassword);
 router.route("/current-user").get(verifyJWT, getCurrentUser);
+router.route("/update-account").patch(verifyJWT, updateAccountDetails);
 router
   .route("/avatar")
   .patch(verifyJWT, upload.single("avatar"), updateUserAvatar);
 router
   .route("/cover-image")
-  .patch(verifyJWT, upload.single("coverImage"), updateCoverImage);
-router.route("/c/:username").get(verifyJWT, getUserChannelProfile);
-router.route("/history").get(verifyJWT, getWatdhHistory);
+  .patch(verifyJWT, upload.single("coverImage"), updateUserCoverImage);
+router.route("/c/:username").get(optionalVerifyJWT, getUserChannelProfile);
+router.route("/history").get(verifyJWT, getWatchHistory);
+
 export default router;

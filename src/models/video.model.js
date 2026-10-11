@@ -1,48 +1,48 @@
 import mongoose from "mongoose";
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
 const { Schema } = mongoose;
-import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2"; // when you usually ask for anything you will evrethingh at once but pagination will aloow you send some chunks at once not all at once like 10 videos in page 1 and 10 more in page 2 
 
-const videoSchema=new Schema({
-    videoFile:{
-        type:String,  //cloudinary url
-        requierd:true,
+const videoSchema = new Schema(
+  {
+    videoFile: {
+      type: String,
+      required: true,
     },
-    thumbnail:{
-                type:String,  //cloudinary url
-        requierd:true,
-    
+    thumbnail: {
+      type: String,
+      required: true,
     },
-    title:{
-                type:String, 
-        requierd:true,
+    title: {
+      type: String,
+      required: true,
     },
-    description:{
-                type:String,  
-        requierd:true,
+    description: {
+      type: String,
+      required: true,
     },
-    duration:{
-        type:Number,
-        required:true
+    duration: {
+      type: Number,
+      required: true,
     },
-    views:{
-        type:Number,
-        default:true,
+    views: {
+      type: Number,
+      default: 0,
     },
-    isPublished:{
-        type:Boolean,
-        default:true,
+    isPublished: {
+      type: Boolean,
+      default: true,
     },
-    owner:{
-        type:Schema.Types.ObjectId,
-        ref:"User"
-    }
+    owner: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 
-},{
-    timestamps:true
-})
+videoSchema.plugin(mongooseAggregatePaginate);
 
-videoSchema.plugin(mongooseAggregatePaginate)    //you dont use plugin when you directly some function you only use it when you need to change the behaviour of the cetain function sometimes you can just import it and leave it just use the functions directly
-
-
-export const Video=mongoose.model("Video",videoSchema)
+export const Video = mongoose.model("Video", videoSchema);
