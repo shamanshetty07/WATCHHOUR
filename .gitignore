@@ -146,3 +146,10 @@ node_modules
 .env
 dist
 build
+
+# user uploads & temp files
+public/uploads/*
+!public/uploads/.gitkeep
+public/temp/*
+!public/temp/.gitkeep
+.DS_Store

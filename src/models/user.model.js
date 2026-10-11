@@ -42,7 +42,23 @@ const userSchema = new Schema(
     ],
     password: {
       type: String,
-      required: [true, "Password is required"],
+      // OAuth-only accounts have no password
+      required: [
+        function () {
+          return !this.googleId && !this.githubId;
+        },
+        "Password is required",
+      ],
+    },
+    googleId: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+    githubId: {
+      type: String,
+      unique: true,
+      sparse: true,
     },
     refreshToken: {
       type: String,
@@ -59,6 +75,7 @@ userSchema.pre("save", async function () {
 });
 
 userSchema.methods.isPasswordCorrect = async function (password) {
+  if (!this.password || !password) return false;
   return await bcrypt.compare(password, this.password);
 };
 

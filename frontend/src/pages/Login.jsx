@@ -1,12 +1,14 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import OAuthButtons from "../components/OAuthButtons";
 import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
-  const [error, setError] = useState("");
+  const [searchParams] = useSearchParams();
+  const [error, setError] = useState(searchParams.get("error") || "");
   const [loading, setLoading] = useState(false);
 
   const handleChange = (event) => {
@@ -31,9 +33,11 @@ export default function Login() {
   return (
     <div className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center px-4">
       <h1 className="mb-2 text-3xl font-bold">Sign in</h1>
-      <p className="mb-6 text-zinc-400">Welcome back to VideoTube</p>
+      <p className="mb-6 text-zinc-400">Welcome back to WatchHour</p>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <OAuthButtons />
+
+      <form onSubmit={handleSubmit} className="mt-4 space-y-4">
         <input
           name="email"
           type="email"

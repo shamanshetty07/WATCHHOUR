@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import OAuthButtons from "../components/OAuthButtons";
 
 export default function Register() {
   const { register } = useAuth();
@@ -49,9 +50,11 @@ export default function Register() {
   return (
     <div className="mx-auto max-w-md px-4 py-8">
       <h1 className="mb-2 text-3xl font-bold">Create account</h1>
-      <p className="mb-6 text-zinc-400">Join VideoTube and start sharing</p>
+      <p className="mb-6 text-zinc-400">Join WatchHour and start sharing</p>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <OAuthButtons />
+
+      <form onSubmit={handleSubmit} className="mt-4 space-y-4">
         <input
           name="fullname"
           placeholder="Full name"

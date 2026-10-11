@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import api from "../api/axios";
 import { useAuth } from "../context/AuthContext";
 
 export default function VideoDetail() {
   const { videoId } = useParams();
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [video, setVideo] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
@@ -55,6 +58,18 @@ export default function VideoDetail() {
     }
   };
 
+  const deleteVideo = async () => {
+    setDeleting(true);
+    try {
+      await api.delete(`/videos/v/${videoId}`);
+      navigate(`/channel/${user.username}`, { replace: true });
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to delete video");
+      setDeleting(false);
+      setConfirmingDelete(false);
+    }
+  };
+
   const handleCommentSubmit = async (event) => {
     event.preventDefault();
     if (!user || !newComment.trim()) return;
@@ -81,6 +96,9 @@ export default function VideoDetail() {
       <div className="mx-auto max-w-4xl px-4 py-10 text-red-300">{error}</div>
     );
   }
+
+  const isOwner =
+    user && video.owner && String(video.owner._id) === String(user._id);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6">
@@ -133,8 +151,40 @@ export default function VideoDetail() {
                 {video.isLiked ? "Liked" : "Like"}
               </button>
             )}
+            {isOwner &&
+              (confirmingDelete ? (
+                <>
+                  <button
+                    onClick={deleteVideo}
+                    disabled={deleting}
+                    className="rounded-full bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-500 disabled:opacity-60"
+                  >
+                    {deleting ? "Deleting..." : "Confirm delete"}
+                  </button>
+                  <button
+                    onClick={() => setConfirmingDelete(false)}
+                    disabled={deleting}
+                    className="rounded-full border border-zinc-700 px-4 py-2 text-sm hover:bg-zinc-800"
+                  >
+                    Cancel
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => setConfirmingDelete(true)}
+                  className="rounded-full border border-red-900 px-4 py-2 text-sm text-red-300 hover:bg-red-950/40"
+                >
+                  Delete
+                </button>
+              ))}
           </div>
         </div>
+
+        {error && (
+          <p className="mt-4 rounded-lg border border-red-900 bg-red-950/40 p-3 text-sm text-red-300">
+            {error}
+          </p>
+        )}
 
         <p className="mt-4 whitespace-pre-wrap rounded-xl bg-zinc-900 p-4 text-zinc-300">
           {video.description}

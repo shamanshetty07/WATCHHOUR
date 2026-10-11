@@ -3,6 +3,12 @@ import { ApiError } from "../utils/ApiError.js";
 const errorHandler = (err, req, res, next) => {
   let error = err;
 
+  if (err?.code === "LIMIT_FILE_SIZE") {
+    error = new ApiError(400, "File is too large. Max size is 100MB.");
+  } else if (err?.name === "MulterError") {
+    error = new ApiError(400, err.message);
+  }
+
   if (!(error instanceof ApiError)) {
     const statusCode = error.statusCode || 500;
     const message = error.message || "Something went wrong";

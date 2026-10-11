@@ -5,6 +5,9 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import mongoose from "mongoose";
 import { User } from "../models/user.model.js";
+import { Comment } from "../models/comment.model.js";
+import { Like } from "../models/like.model.js";
+import { Playlist } from "../models/playlist.model.js";
 
 const getAllVideos = asyncHandler(async (req, res) => {
   const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
@@ -275,6 +278,20 @@ const deleteVideo = asyncHandler(async (req, res) => {
   }
 
   await Video.findByIdAndDelete(videoId);
+
+  // clean up everything that referenced the video
+  const commentIds = await Comment.find({ video: videoId }).distinct("_id");
+  await Promise.all([
+    Comment.deleteMany({ video: videoId }),
+    Like.deleteMany({
+      $or: [{ video: videoId }, { comment: { $in: commentIds } }],
+    }),
+    Playlist.updateMany({ videos: videoId }, { $pull: { videos: videoId } }),
+    User.updateMany(
+      { watchHistory: videoId },
+      { $pull: { watchHistory: videoId } }
+    ),
+  ]);
 
   return res
     .status(200)

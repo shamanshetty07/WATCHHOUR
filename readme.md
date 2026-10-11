@@ -1,4 +1,4 @@
-# VideoTube — YouTube Clone (Full Stack)
+# WatchHour — YouTube Clone (Full Stack)
 
 A full-stack YouTube-style video platform built with **Express + MongoDB** (backend) and **React + Vite** (frontend).
 ## Features

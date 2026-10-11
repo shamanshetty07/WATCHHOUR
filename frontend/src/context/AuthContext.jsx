@@ -19,12 +19,9 @@ export function AuthProvider({ children }) {
     }
   };
 
+  // Session may live in the httpOnly cookie only (OAuth sign-in), so always ask the server.
   useEffect(() => {
-    if (localStorage.getItem("accessToken")) {
-      fetchCurrentUser();
-    } else {
-      setLoading(false);
-    }
+    fetchCurrentUser();
   }, []);
 
   const login = async (credentials) => {
@@ -51,7 +48,15 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, login, register, logout, fetchCurrentUser }}
+      value={{
+        user,
+        loading,
+        login,
+        register,
+        logout,
+        fetchCurrentUser,
+        setUser,
+      }}
     >
       {children}
     </AuthContext.Provider>

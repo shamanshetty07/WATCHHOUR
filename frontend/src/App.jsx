@@ -8,6 +8,7 @@ import Register from "./pages/Register";
 import VideoDetail from "./pages/VideoDetail";
 import UploadVideo from "./pages/UploadVideo";
 import Channel from "./pages/Channel";
+import OAuthCallback from "./pages/OAuthCallback";
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/oauth/callback" element={<OAuthCallback />} />
           <Route path="/video/:videoId" element={<VideoDetail />} />
           <Route path="/channel/:username" element={<Channel />} />
           <Route
